@@ -19,6 +19,7 @@
 use futures::{channel::oneshot, Stream};
 use libp2p::PeerId;
 
+use log::info;
 use sc_consensus::{BlockImportError, BlockImportStatus, JustificationSyncLink, Link};
 use sc_network::{NetworkBlock, NetworkSyncForkRequest};
 use sc_network_common::sync::{
@@ -180,6 +181,7 @@ impl<B: BlockT> JustificationSyncLink<B> for SyncingService<B> {
 	/// On success, the justification will be passed to the import queue that was part at
 	/// initialization as part of the configuration.
 	fn request_justification(&self, hash: &B::Hash, number: NumberFor<B>) {
+		info!("~~ request justification {}", number);
 		let _ = self.tx.unbounded_send(ToServiceCommand::RequestJustification(*hash, number));
 	}
 

@@ -20,7 +20,7 @@ use futures::{
 	task::{Context, Poll},
 };
 use futures_timer::Delay;
-use log::{debug, trace};
+use log::{debug, info ,trace};
 use prometheus_endpoint::Registry;
 use sc_utils::mpsc::{tracing_unbounded, TracingUnboundedReceiver, TracingUnboundedSender};
 use sp_consensus::BlockOrigin;
@@ -129,7 +129,7 @@ impl<B: BlockT> ImportQueueService<B> for BasicQueueHandle<B> {
 			return
 		}
 
-		trace!(target: LOG_TARGET, "Scheduling {} blocks for import", blocks.len());
+		info!(target: LOG_TARGET, "Scheduling {} blocks for import, justifications len {:#?} ", blocks.len(), blocks[0].justifications);
 		let res = self
 			.block_import_sender
 			.unbounded_send(worker_messages::ImportBlocks(origin, blocks));
@@ -149,6 +149,7 @@ impl<B: BlockT> ImportQueueService<B> for BasicQueueHandle<B> {
 		number: NumberFor<B>,
 		justifications: Justifications,
 	) {
+		info!("~~ import justification, {}", number);
 		for justification in justifications {
 			let res = self.justification_sender.unbounded_send(
 				worker_messages::ImportJustification(who, hash, number, justification),
@@ -289,6 +290,7 @@ impl<B: BlockT> BlockImportWorker<B> {
 			// Let's initialize `justification_import`
 			if let Some(justification_import) = worker.justification_import.as_mut() {
 				for (hash, number) in justification_import.on_start().await {
+					info!("~~ basic queue request justification, {}", number);
 					worker.result_sender.request_justification(&hash, number);
 				}
 			}
@@ -349,6 +351,8 @@ impl<B: BlockT> BlockImportWorker<B> {
 		justification: Justification,
 	) {
 		let started = std::time::Instant::now();
+
+		info!("~~ basic queue import justification of block {}", number);
 
 		let success = match self.justification_import.as_mut() {
 			Some(justification_import) => justification_import
