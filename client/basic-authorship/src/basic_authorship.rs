@@ -359,6 +359,11 @@ where
 		let proof =
 			PR::into_proof(proof).map_err(|e| sp_blockchain::Error::Application(Box::new(e)))?;
 
+		let pool_status = self.transaction_pool.status(); 
+		info!("****** after make block. block_number:{}. transaction pool status. ready tx: {}, include tx:{}",
+				block.header().number(), pool_status.ready, block.extrinsics().len());
+		
+
 		self.print_summary(&block, end_reason, block_took, propose_with_timer.elapsed());
 		Ok(Proposal { block, proof, storage_changes })
 	}
