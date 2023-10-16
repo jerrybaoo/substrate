@@ -213,8 +213,8 @@ mod tests {
 
 				// We only expect the weight to increase if the voter did not
 				// start out as an equivocator and did not yet vote.
-				if !ctx.equivocations.test_bit(vote.bit.position) &&
-					!n.bits.test_bit(vote.bit.position)
+				if !ctx.equivocations.test_bit(vote.bit.position)
+					&& !n.bits.test_bit(vote.bit.position)
 				{
 					expected = expected + v.weight();
 				}

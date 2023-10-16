@@ -77,8 +77,8 @@ where
 		//   - rounds are not backgrounded when incomplete unless we've skipped forward
 		//   - if we skipped forward we may never complete this round and we don't need
 		//     to keep it forever.
-		self.round_committer.is_none() &&
-			self.inner.round_state().estimate.map_or(true, |x| x.1 <= self.finalized_number)
+		self.round_committer.is_none()
+			&& self.inner.round_state().estimate.map_or(true, |x| x.1 <= self.finalized_number)
 	}
 
 	fn update_finalized(&mut self, new_finalized: N) {
@@ -121,8 +121,9 @@ where
 			None => None,
 			Some(mut committer) => match committer.commit(cx, &mut self.inner)? {
 				Poll::Ready(None) => None,
-				Poll::Ready(Some(commit)) =>
-					return Poll::Ready(Ok(BackgroundRoundChange::Committed(commit))),
+				Poll::Ready(Some(commit)) => {
+					return Poll::Ready(Ok(BackgroundRoundChange::Committed(commit)))
+				},
 				Poll::Pending => Some(committer),
 			},
 		};
@@ -173,11 +174,11 @@ where
 	) -> Result<bool, E::Error> {
 		// ignore commits for a block lower than we already finalized
 		if commit.target_number < voting_round.finalized().map_or_else(N::zero, |(_, n)| *n) {
-			return Ok(true)
+			return Ok(true);
 		}
 
 		if voting_round.check_and_import_from_commit(&commit)?.is_none() {
-			return Ok(false)
+			return Ok(false);
 		}
 
 		self.last_commit = Some(commit);
@@ -204,7 +205,9 @@ where
 			(None, Some(_)) => Poll::Ready(Ok(voting_round.finalizing_commit().cloned())),
 			(Some(Commit { target_number, .. }), Some((_, finalized_number)))
 				if target_number < *finalized_number =>
-				Poll::Ready(Ok(voting_round.finalizing_commit().cloned())),
+			{
+				Poll::Ready(Ok(voting_round.finalizing_commit().cloned()))
+			},
 			_ => Poll::Ready(Ok(None)),
 		}
 	}
@@ -350,7 +353,7 @@ where
 						commit.target_hash,
 					);
 
-					return Poll::Ready(Some(Ok((number, commit))))
+					return Poll::Ready(Some(Ok((number, commit))));
 				},
 				Poll::Ready(Some((Err(err), _))) => return Poll::Ready(Some(Err(err))),
 				Poll::Ready(None) => return Poll::Ready(None),

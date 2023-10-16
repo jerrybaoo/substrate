@@ -61,8 +61,9 @@ impl<Vote: Eq, Signature: Eq> VoteMultiplicity<Vote, Signature> {
 	fn contains(&self, vote: &Vote, signature: &Signature) -> bool {
 		match self {
 			VoteMultiplicity::Single(v, s) => v == vote && s == signature,
-			VoteMultiplicity::Equivocated((v1, s1), (v2, s2)) =>
-				v1 == vote && s1 == signature || v2 == vote && s2 == signature,
+			VoteMultiplicity::Equivocated((v1, s1), (v2, s2)) => {
+				v1 == vote && s1 == signature || v2 == vote && s2 == signature
+			},
 		}
 	}
 }
@@ -111,15 +112,17 @@ impl<Id: Ord + Eq + Clone, Vote: Clone + Eq, Signature: Clone + Eq>
 			},
 			Entry::Occupied(mut occupied) => {
 				if occupied.get().contains(&vote, &signature) {
-					return AddVoteResult { multiplicity: None, duplicated: true }
+					return AddVoteResult { multiplicity: None, duplicated: true };
 				}
 
 				// import, but ignore further equivocations.
 				let new_val = match *occupied.get_mut() {
-					VoteMultiplicity::Single(ref v, ref s) =>
-						VoteMultiplicity::Equivocated((v.clone(), s.clone()), (vote, signature)),
-					VoteMultiplicity::Equivocated(_, _) =>
-						return AddVoteResult { multiplicity: None, duplicated: false },
+					VoteMultiplicity::Single(ref v, ref s) => {
+						VoteMultiplicity::Equivocated((v.clone(), s.clone()), (vote, signature))
+					},
+					VoteMultiplicity::Equivocated(_, _) => {
+						return AddVoteResult { multiplicity: None, duplicated: false }
+					},
 				};
 
 				*occupied.get_mut() = new_val;
@@ -283,7 +286,7 @@ where
 				AddVoteResult { multiplicity: Some(m), .. } => m,
 				AddVoteResult { duplicated, .. } => {
 					import_result.duplicated = duplicated;
-					return Ok(import_result)
+					return Ok(import_result);
 				},
 			};
 			let round_number = self.round_number;
@@ -368,7 +371,7 @@ where
 				AddVoteResult { multiplicity: Some(m), .. } => m,
 				AddVoteResult { duplicated, .. } => {
 					import_result.duplicated = duplicated;
-					return Ok(import_result)
+					return Ok(import_result);
 				},
 			};
 
@@ -455,13 +458,14 @@ where
 
 			fn next(&mut self) -> Option<(V, S)> {
 				match self.multiplicity {
-					VoteMultiplicity::Single(ref v, ref s) =>
+					VoteMultiplicity::Single(ref v, ref s) => {
 						if self.yielded == 0 {
 							self.yielded += 1;
 							Some((v.clone(), s.clone()))
 						} else {
 							None
-						},
+						}
+					},
 					VoteMultiplicity::Equivocated(ref a, ref b) => {
 						let res = match self.yielded {
 							0 => Some(a.clone()),
@@ -509,7 +513,7 @@ where
 		let threshold = self.threshold();
 
 		if self.prevote.current_weight < threshold {
-			return
+			return;
 		}
 
 		let (g_hash, g_num) = match self.prevote_ghost.clone() {
@@ -577,7 +581,7 @@ where
 			self.estimate = self.graph.find_ancestor(g_hash.clone(), g_num, possible_to_precommit);
 		} else {
 			self.estimate = Some((g_hash, g_num));
-			return
+			return;
 		}
 
 		self.completable = self.estimate.clone().map_or(false, |(b_hash, b_num)| {

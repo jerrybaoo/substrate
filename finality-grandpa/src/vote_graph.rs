@@ -46,7 +46,7 @@ impl<H: Ord + PartialEq + Clone, N: BlockNumberOps, V> Entry<H, N, V> {
 	// by that number in the direct ancestry.
 	fn ancestor_block(&self, number: N) -> Option<&H> {
 		if number >= self.number {
-			return None
+			return None;
 		}
 		let offset = self.number - number - N::one();
 
@@ -123,7 +123,7 @@ where
 
 		// not a valid ancestry proof. TODO: error?
 		if ancestry_proof.len() > self.base_number.as_() {
-			return
+			return;
 		}
 
 		// hack because we can't convert usize -> N, only vice-versa.
@@ -215,7 +215,7 @@ where
 						self.entries.get(&hash).expect("by defn of find_containing_nodes; qed");
 					// If the weight is sufficient, we are done.
 					if condition(&node.cumulative_vote) {
-						return Some((hash, number))
+						return Some((hash, number));
 					}
 					// Not enough weight, check the parent block.
 					match node.ancestors.get(0) {
@@ -230,7 +230,7 @@ where
 					// If there are no vote-nodes below the block in the graph,
 					// the block is not in the graph at all.
 					if children.is_empty() {
-						return None
+						return None;
 					}
 					// The block is "contained" in the graph (i.e. in the ancestry-chain
 					// of at least one vote-node) but does not itself have a vote-node.
@@ -241,7 +241,7 @@ where
 						v += &e.cumulative_vote;
 					}
 					if condition(&v) {
-						return Some((hash, number))
+						return Some((hash, number));
 					}
 
 					// Not enough weight, check the parent block.
@@ -322,7 +322,7 @@ where
 		let mut active_node = get_node(&node_key);
 
 		if !condition(&active_node.cumulative_vote) {
-			return None
+			return None;
 		}
 
 		// breadth-first search starting from this node.
@@ -410,7 +410,7 @@ where
 							descendent_blocks[idx].1 += &d_node.cumulative_vote;
 							if condition(&descendent_blocks[idx].1) {
 								new_best = Some(d_block.clone());
-								break
+								break;
 							}
 						},
 						Err(idx) => descendent_blocks
@@ -443,7 +443,7 @@ where
 	// otherwise.
 	fn find_containing_nodes(&self, hash: H, number: N) -> Option<Vec<H>> {
 		if self.entries.contains_key(&hash) {
-			return None
+			return None;
 		}
 
 		let mut containing_keys = Vec::new();
@@ -462,7 +462,7 @@ where
 
 				// if node has been checked already, break
 				if !visited.insert(head.clone()) {
-					break
+					break;
 				}
 
 				match active_entry.in_direct_ancestry(&hash, number) {
@@ -471,14 +471,15 @@ where
 						containing_keys.push(head.clone());
 					},
 					Some(false) => {}, // nothing in this branch. continue search.
-					None =>
+					None => {
 						if let Some(prev) = active_entry.ancestor_node() {
 							head = prev;
-							continue // iterate backwards
-						},
+							continue; // iterate backwards
+						}
+					},
 				}
 
-				break
+				break;
 			}
 		}
 
@@ -562,7 +563,7 @@ where
 			if let Some(entry) = self.entries.get_mut(ancestor) {
 				entry.descendents.push(hash.clone());
 				ancestor_index = Some(i);
-				break
+				break;
 			}
 		}
 

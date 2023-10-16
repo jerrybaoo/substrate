@@ -88,7 +88,7 @@ impl Bitfield {
 		let word_off = position / 64;
 
 		if word_off >= self.bits.len() {
-			return false
+			return false;
 		}
 
 		test_bit(self.bits[word_off], position % 64)

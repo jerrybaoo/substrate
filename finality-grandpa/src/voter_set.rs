@@ -83,7 +83,7 @@ impl<Id: Eq + Ord> VoterSet<Id> {
 
 		if voters.is_empty() {
 			// No non-zero weights; the set would be empty.
-			return None
+			return None;
 		}
 
 		let voters = voters
@@ -201,7 +201,7 @@ mod tests {
 				//
 				// the easiest thing to do is to just retry generating another instance.
 				if let Some(set) = VoterSet::new(ids.into_iter().zip(weights)) {
-					break set
+					break set;
 				}
 			}
 		}
@@ -234,7 +234,7 @@ mod tests {
 
 			// this validator set is invalid
 			if total_weight > u64::max_value() as u128 {
-				return
+				return;
 			}
 
 			let expected = VoterWeight::new(total_weight as u64);

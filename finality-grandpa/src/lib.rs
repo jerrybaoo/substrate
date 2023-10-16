@@ -194,7 +194,7 @@ pub trait Chain<H: Eq, N: Copy + BlockNumberOps> {
 	/// Returns true if `block` is a descendent of or equal to the given `base`.
 	fn is_equal_or_descendent_of(&self, base: H, block: H) -> bool {
 		if base == block {
-			return true
+			return true;
 		}
 
 		// TODO: currently this function always succeeds since the only error
@@ -452,7 +452,7 @@ where
 		.filter(|signed| {
 			if !voters.contains(&signed.id) {
 				validation_result.num_invalid_voters += 1;
-				return false
+				return false;
 			}
 
 			true
@@ -479,7 +479,7 @@ where
 	});
 
 	if !all_precommits_higher_than_base {
-		return Ok(validation_result)
+		return Ok(validation_result);
 	}
 
 	let mut equivocated = std::collections::BTreeSet::new();
@@ -497,13 +497,14 @@ where
 				validation_result.num_equivocations += 1;
 				// allow only one equivocation per voter, as extras are redundant.
 				if !equivocated.insert(id) {
-					return Ok(validation_result)
+					return Ok(validation_result);
 				}
 			},
-			ImportResult { duplicated, .. } =>
+			ImportResult { duplicated, .. } => {
 				if duplicated {
 					validation_result.num_duplicated_precommits += 1;
-				},
+				}
+			},
 		}
 	}
 
@@ -511,8 +512,8 @@ where
 	// round and it must be equal to the commit target
 	match round.precommit_ghost() {
 		Some((precommit_ghost_hash, precommit_ghost_number))
-			if precommit_ghost_hash == commit.target_hash &&
-				precommit_ghost_number == commit.target_number =>
+			if precommit_ghost_hash == commit.target_hash
+				&& precommit_ghost_number == commit.target_number =>
 		{
 			validation_result.valid = true;
 		},

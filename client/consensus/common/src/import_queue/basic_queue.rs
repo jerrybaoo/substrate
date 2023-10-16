@@ -20,7 +20,7 @@ use futures::{
 	task::{Context, Poll},
 };
 use futures_timer::Delay;
-use log::{debug, info ,trace};
+use log::{debug, info, trace};
 use prometheus_endpoint::Registry;
 use sc_utils::mpsc::{tracing_unbounded, TracingUnboundedReceiver, TracingUnboundedSender};
 use sp_consensus::BlockOrigin;
@@ -126,7 +126,7 @@ impl<B: BlockT> BasicQueueHandle<B> {
 impl<B: BlockT> ImportQueueService<B> for BasicQueueHandle<B> {
 	fn import_blocks(&mut self, origin: BlockOrigin, blocks: Vec<IncomingBlock<B>>) {
 		if blocks.is_empty() {
-			return
+			return;
 		}
 
 		info!(target: LOG_TARGET, "Scheduling {} blocks for import, justifications len {:#?} ", blocks.len(), blocks[0].justifications);
@@ -195,7 +195,7 @@ impl<B: BlockT, Transaction: Send> ImportQueue<B> for BasicQueue<B, Transaction>
 		loop {
 			if let Err(_) = self.result_port.next_action(&mut *link).await {
 				log::error!(target: "sync", "poll_actions: Background import task is no longer alive");
-				return
+				return;
 			}
 		}
 	}
@@ -238,7 +238,7 @@ async fn block_import_process<B: BlockT, Transaction: Send + 'static>(
 					target: LOG_TARGET,
 					"Stopping block import because the import channel was closed!",
 				);
-				return
+				return;
 			},
 		};
 
@@ -313,26 +313,27 @@ impl<B: BlockT> BlockImportWorker<B> {
 						target: LOG_TARGET,
 						"Stopping block import because result channel was closed!",
 					);
-					return
+					return;
 				}
 
 				// Make sure to first process all justifications
 				while let Poll::Ready(justification) = futures::poll!(justification_port.next()) {
 					match justification {
-						Some(ImportJustification(who, hash, number, justification)) =>
-							worker.import_justification(who, hash, number, justification).await,
+						Some(ImportJustification(who, hash, number, justification)) => {
+							worker.import_justification(who, hash, number, justification).await
+						},
 						None => {
 							log::debug!(
 								target: LOG_TARGET,
 								"Stopping block import because justification channel was closed!",
 							);
-							return
+							return;
 						},
 					}
 				}
 
 				if let Poll::Ready(()) = futures::poll!(&mut block_import_process) {
-					return
+					return;
 				}
 
 				// All futures that we polled are now pending.
@@ -428,7 +429,7 @@ async fn import_many_blocks<B: BlockT, V: Verifier<B>, Transaction: Send + 'stat
 			Some(b) => b,
 			None => {
 				// No block left to import, success!
-				return ImportManyBlocksResult { block_count: count, imported, results }
+				return ImportManyBlocksResult { block_count: count, imported, results };
 			},
 		};
 

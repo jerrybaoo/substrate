@@ -199,7 +199,7 @@ where
 
 		// early exit if the current round is not completable
 		if !self.votes.completable() {
-			return Poll::Pending
+			return Poll::Pending;
 		}
 
 		// make sure that the previous round estimate has been finalized
@@ -237,7 +237,7 @@ where
 				self.round_number()
 			);
 			self.log_participation(log::Level::Trace);
-			return Poll::Pending
+			return Poll::Pending;
 		}
 
 		debug!(
@@ -316,7 +316,7 @@ where
 		commit: &Commit<H, N, E::Signature, E::Id>,
 	) -> Result<Option<(H, N)>, E::Error> {
 		if !validate_commit(commit, self.voters(), &*self.env)?.is_valid() {
-			return Ok(None)
+			return Ok(None);
 		}
 
 		for SignedPrecommit { precommit, signature, id } in commit.precommits.iter().cloned() {
@@ -380,7 +380,7 @@ where
 				message.target(),
 				self.votes.base(),
 			);
-			return Ok(())
+			return Ok(());
 		}
 
 		match message {
@@ -481,7 +481,7 @@ where
 							self.outgoing.push(Message::PrimaryPropose(primary));
 							self.state = Some(State::Proposed(prevote_timer, precommit_timer));
 
-							return Ok(())
+							return Ok(());
 						} else {
 							debug!(
 								target: LOG_TARGET,
@@ -569,7 +569,7 @@ where
 				Poll::Ready(Ok(best_chain)) => best_chain,
 				Poll::Pending => {
 					this.state = Some(State::Prevoting(precommit_timer, (base, best_chain)));
-					return Ok(())
+					return Ok(());
 				},
 			};
 
@@ -631,8 +631,9 @@ where
 					// we wait for the last round's estimate to be equal to or
 					// the ancestor of the current round's p-Ghost before precommitting.
 					self.votes.state().prevote_ghost.as_ref().map_or(false, |p_g| {
-						p_g == &last_round_estimate ||
-							self.env
+						p_g == &last_round_estimate
+							|| self
+								.env
 								.is_equal_or_descendent_of(last_round_estimate.0, p_g.0.clone())
 					})
 				} && match precommit_timer.poll_unpin(cx) {

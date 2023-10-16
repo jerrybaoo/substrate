@@ -209,14 +209,14 @@ fn n_choose_r(n: u8, r: u8) -> u8 {
 fn kth_combination(k: u8, n: u8, r: u8) -> Vec<u8> {
 	fn r_helper(k: u8, n: u8, r: u8, off: u8, v: &mut Vec<u8>) {
 		if r == 0 {
-			return
+			return;
 		}
 
 		// the "tail" of the list we have here is all the elements from the offset
 		// to the total number of elements.
 		if n == 0 {
 			v.extend((0..r).map(|x| x + off));
-			return
+			return;
 		}
 
 		// how many choices there are of the remaining.
@@ -302,7 +302,7 @@ pub fn execute_fuzzed_vote(data: &[u8]) {
 
 	if prevotes.len() != n as usize {
 		// fuzzer needs to get us more data.
-		return
+		return;
 	}
 
 	// Import prevotes and determine the precommit target (i.e. the prevote
@@ -508,8 +508,8 @@ pub fn execute_fuzzed_graph(data: &[u8]) {
 				// Determine completability.
 				graph
 					.find_ghost(Some((hash, nr)), possible_to_precommit)
-					.expect("by definition of estimate") ==
-					prevote_ghost
+					.expect("by definition of estimate")
+					== prevote_ghost
 			}
 		});
 
