@@ -4,7 +4,9 @@ use futures::FutureExt;
 use node_template_runtime::{self, opaque::Block, RuntimeApi};
 use sc_client_api::{Backend, BlockBackend};
 use sc_consensus_aura::{ImportQueueParams, SlotProportion, StartAuraParams};
-use sc_consensus_grandpa::SharedVoterState;
+use sc_consensus_grandpa::{
+	BeforeBestBlockBy, SharedVoterState, ThreeQuartersOfTheUnfinalizedChain,
+};
 pub use sc_executor::NativeElseWasmExecutor;
 use sc_service::{error::Error as ServiceError, Configuration, TaskManager, WarpSyncParams};
 use sc_telemetry::{Telemetry, TelemetryWorker};
@@ -305,12 +307,18 @@ pub fn new_full(config: Configuration) -> Result<TaskManager, ServiceError> {
 		// and vote data availability than the observer. The observer has not
 		// been tested extensively yet and having most nodes in a network run it
 		// could lead to finality stalls.
+
+		let voting_rule = sc_consensus_grandpa::VotingRulesBuilder::new()
+			.add(BeforeBestBlockBy(0))
+			.add(ThreeQuartersOfTheUnfinalizedChain)
+			.build();
+
 		let grandpa_config = sc_consensus_grandpa::GrandpaParams {
 			config: grandpa_config,
 			link: grandpa_link,
 			network,
 			sync: Arc::new(sync_service),
-			voting_rule: sc_consensus_grandpa::VotingRulesBuilder::default().build(),
+			voting_rule,
 			prometheus_registry,
 			shared_voter_state: SharedVoterState::empty(),
 			telemetry: telemetry.as_ref().map(|x| x.handle()),
